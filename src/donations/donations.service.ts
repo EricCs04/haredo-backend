@@ -17,6 +17,7 @@ import {
   UpdateDonationStatusDto,
   CreateMessageDto,
 } from './dto/donation.dto';
+import { randomBytes } from 'crypto';
  
 @Injectable()
 export class DonationsService {
@@ -40,24 +41,18 @@ export class DonationsService {
     }
  
     return this.dataSource.transaction(async (manager) => {
+      const code = randomBytes(3).toString('hex');
+
       const donation = manager.create(Donation, {
         user: { id: userId },
         need: { id: need.id },
         ong: { id: need.ong.id },
         quantity: dto.quantity,
         status: DonationStatus.PENDING,
+        confirmationCode: code,
       });
  
       const saved = await manager.save(Donation, donation);
- 
-      // Atualiza quantityReceived e status da necessidade na mesma transação
-      need.quantityReceived = (need.quantityReceived || 0) + dto.quantity;
-      if (need.quantityReceived >= need.quantityNeeded) {
-        need.status = NeedStatus.FULFILLED;
-      } else if (need.quantityReceived > 0) {
-        need.status = NeedStatus.IN_PROGRESS;
-      }
-      await manager.save(need);
  
       return saved;
     });
@@ -153,5 +148,53 @@ export class DonationsService {
       [DonationStatus.CANCELLED]:   [],
     };
     return map[current];
+  }
+  
+  async confirmDonation(
+    donationId: string,
+    code: string,
+    ongId: string,
+  ): Promise<Donation> {
+    return this.dataSource.transaction(async (manager) => {
+      const donation = await manager.findOne(Donation, {
+        where: { id: donationId },
+        relations: ['need', 'ong'],
+      });
+
+      if (!donation) {
+       throw new NotFoundException('Doação não encontrada');
+      }
+
+      if (donation.ong.id !== ongId) {
+        throw new ForbiddenException('ONG não autorizada');
+      }
+
+     if (donation.confirmationCode?.trim() !== code.trim()) {
+       throw new BadRequestException('Código inválido');
+      }
+
+     if (donation.confirmed) {
+       throw new BadRequestException('Doação já confirmada');
+      }
+
+      donation.confirmed = true;
+      donation.status = DonationStatus.COMPLETED;
+
+      await manager.save(donation);
+
+      const need = donation.need;
+
+      need.quantityReceived += donation.quantity;
+
+      if (need.quantityReceived >= need.quantityNeeded) {
+        need.status = NeedStatus.FULFILLED;
+      } else {
+        need.status = NeedStatus.IN_PROGRESS;
+      }
+
+      await manager.save(need);
+
+      return donation;
+    });
   }
 }

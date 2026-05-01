@@ -9,20 +9,20 @@ import {
  
 export class CreateOngDto {
   @IsString()
-  name: string;
+  name!: string;
  
   @IsEmail()
-  email: string;
+  email!: string;
  
   @IsString()
   @MinLength(6)
-  password: string;
+  password!: string;
  
   @IsString()
   @Matches(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, {
     message: 'CNPJ inválido. Formato esperado: XX.XXX.XXX/XXXX-XX',
   })
-  cnpj: string;
+  cnpj!: string;
  
   @IsOptional()
   @IsString()

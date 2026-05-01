@@ -3,19 +3,23 @@ import { DonationStatus } from '../donation-status.enum';
  
 export class CreateDonationDto {
   @IsUUID()
-  needId: string;
+  needId!: string;
  
   @IsInt()
   @Min(1)
-  quantity: number;
+  quantity!: number;
 }
  
 export class UpdateDonationStatusDto {
   @IsEnum(DonationStatus)
-  status: DonationStatus;
+  status!: DonationStatus;
 }
  
 export class CreateMessageDto {
   @IsString()
-  content: string;
+  content!: string;
+}
+export class ConfirmDonationDto {
+  @IsString()
+  code!: string;
 }

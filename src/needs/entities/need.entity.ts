@@ -14,33 +14,39 @@ import { NeedStatus } from '../need-status.enum';
 @Entity('needs')
 export class Need {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
  
   @ManyToOne(() => Ong, { onDelete: 'CASCADE', eager: false })
   @JoinColumn({ name: 'ong_id' })
-  ong: Ong;
+  ong!: Ong;
  
   @Column()
-  title: string;
+  title!: string;
  
   @Column({ nullable: true, type: 'text' })
-  description: string;
+  description!: string;
  
   @Column()
-  category: string;
+  category!: string;
  
   @Column({ type: 'int', name: 'quantity_needed' })
-  quantityNeeded: number;
+  quantityNeeded!: number;
  
   @Column({ type: 'int', name: 'quantity_received', default: 0 })
-  quantityReceived: number;
+  quantityReceived!: number;
  
   @Column({ type: 'varchar', enum: NeedStatus, default: NeedStatus.OPEN })
-  status: NeedStatus;
+  status!: NeedStatus;
  
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
  
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
+
+  @Column({ nullable: true })
+  completionMessage?: string;
+
+  @Column('text', { array: true, nullable: true })
+  images?: string[];
 }

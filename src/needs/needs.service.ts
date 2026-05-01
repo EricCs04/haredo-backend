@@ -4,16 +4,21 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Need } from './entities/need.entity';
 import { NeedStatus } from './need-status.enum';
 import { CreateNeedDto, UpdateNeedStatusDto } from './dto/need.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { Donation } from '../donations/entities/donation.entity';
+
  
 @Injectable()
 export class NeedsService {
   constructor(
     @InjectRepository(Need)
     private readonly needsRepo: Repository<Need>,
+    private readonly notificationsService: NotificationsService,
+    private readonly dataSource: DataSource,
   ) {}
  
   async create(dto: CreateNeedDto, ongId: string): Promise<Need> {
@@ -35,21 +40,6 @@ export class NeedsService {
     const need = await this.needsRepo.findOne({ where: { id }, relations: ['ong'] });
     if (!need) throw new NotFoundException('Necessidade não encontrada.');
     return need;
-  }
- 
-  // Chamado pelo DonationsService ao registrar uma doação
-  async onDonationAdded(needId: string, quantity: number): Promise<void> {
-    const need = await this.needsRepo.findOneOrFail({ where: { id: needId } });
- 
-    need.quantityReceived = (need.quantityReceived || 0) + quantity;
- 
-    if (need.quantityReceived >= need.quantityNeeded) {
-      need.status = NeedStatus.FULFILLED;
-    } else if (need.quantityReceived > 0) {
-      need.status = NeedStatus.IN_PROGRESS;
-    }
- 
-    await this.needsRepo.save(need);
   }
  
   // Ação manual da ONG (cancelar ou reabrir)
@@ -80,8 +70,58 @@ export class NeedsService {
       [NeedStatus.OPEN]:        [NeedStatus.CANCELLED],
       [NeedStatus.IN_PROGRESS]: [NeedStatus.CANCELLED],
       [NeedStatus.FULFILLED]:   [NeedStatus.OPEN],
+      [NeedStatus.COMPLETED]:   [],
       [NeedStatus.CANCELLED]:   [],
     };
     return map[current];
   }
+
+  async completeNeed(
+  needId: string,
+  ongId: string,
+  message: string,
+  images: string[],
+): Promise<Need> {
+  const need = await this.findOne(needId);
+
+  if (need.ong.id !== ongId) {
+    throw new ForbiddenException();
+  }
+
+  need.status = NeedStatus.FULFILLED;
+  need.completionMessage = message;
+  need.images = images;
+
+  await this.needsRepo.save(need);
+
+  await this.notifyDonors(need.id);
+
+  return need;
+
+}
+async notifyDonors(needId: string): Promise<void> {
+  const donations = await this.dataSource
+    .getRepository(Donation)
+    .find({
+      where: { need: { id: needId }, confirmed: true, },
+      relations: ['user'],
+    });
+
+  const uniqueUsers = new Map<string, any>();
+
+  for (const d of donations) {
+    if (d.user?.id) {
+      uniqueUsers.set(d.user.id, d.user);
+    }
+  }
+
+  for (const user of uniqueUsers.values()) {
+    await this.notificationsService.notifyUser(
+      user.email,
+      'A campanha que você ajudou foi finalizada! 🎉',
+    );
+  }
+}
+
+
 }

@@ -11,6 +11,9 @@ import { Ong } from './ongs/entities/ong.entity';
 import { Need } from './needs/entities/need.entity';
 import { Donation } from './donations/entities/donation.entity';
 import { Message } from './donations/entities/message.entity';
+import { CollectionPointsModule } from './collection-points/collection-points.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { CollectionPoint } from './collection-points/entities/collection-point.entity';
  
 @Module({
   imports: [
@@ -26,7 +29,7 @@ import { Message } from './donations/entities/message.entity';
         username: config.get('DB_USER', 'postgres'),
         password: config.get('DB_PASS', '2504'),
         database: config.get('DB_NAME', 'ong_app'),
-        entities: [User, Ong, Need, Donation, Message],
+        entities: [User, Ong, Need, Donation, Message, CollectionPoint],
         synchronize: true,
         // Habilita extensão PostGIS ao conectar
         extra: {
@@ -39,6 +42,8 @@ import { Message } from './donations/entities/message.entity';
     OngsModule,
     NeedsModule,
     DonationsModule,
+    CollectionPointsModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

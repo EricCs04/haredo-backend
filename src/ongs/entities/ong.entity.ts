@@ -10,30 +10,30 @@ import {
 @Entity('ongs')
 export class Ong {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
  
   @Column()
-  name: string;
+  name!: string;
  
   @Index({ unique: true })
   @Column()
-  email: string;
+  email!: string;
  
   @Column({ name: 'password_hash' })
-  passwordHash: string;
+  passwordHash!: string;
  
   @Index({ unique: true })
   @Column()
-  cnpj: string;
+  cnpj!: string;
  
   @Column({ nullable: true, type: 'text' })
-  description: string;
+  description!: string;
  
   @Column({ nullable: true })
-  address: string;
+  address!: string;
  
   @Column({ nullable: true })
-  phone: string;
+  phone!: string;
  
   // Localização da ONG para buscas geográficas (PostGIS)
   @Column({
@@ -42,11 +42,11 @@ export class Ong {
     srid: 4326,
     nullable: true,
   })
-  location: string;
+  location!: string;
  
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
  
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

@@ -10,6 +10,8 @@ import {
 import { OngsService } from './ongs.service';
 import { CreateOngDto } from './dto/create-ong.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RequestWithUser } from '@/common/types/request-with-user';
+
  
 @Controller('ongs')
 export class OngsController {
@@ -40,7 +42,7 @@ export class OngsController {
  
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@Request() req) {
+  getProfile(@Request() req: RequestWithUser) {
     return this.ongsService.findById(req.user.sub);
   }
 }

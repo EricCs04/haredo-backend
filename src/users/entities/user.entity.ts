@@ -10,23 +10,23 @@ import {
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
  
   @Column()
-  name: string;
+  name!: string;
  
   @Index({ unique: true })
   @Column()
-  email: string;
+  email!: string;
  
   @Column({ name: 'password_hash' })
-  passwordHash: string;
+  passwordHash!: string;
  
   @Column({ nullable: true })
-  phone: string;
+  phone!: string;
  
   @Column({ nullable: true })
-  address: string;
+  address!: string;
  
   // Ponto geográfico para busca por proximidade (PostGIS)
   @Column({
@@ -35,11 +35,11 @@ export class User {
     srid: 4326,
     nullable: true,
   })
-  location: string;
+  location!: string;
  
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
  
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

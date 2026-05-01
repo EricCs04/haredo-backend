@@ -15,10 +15,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/role.enum';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiBody } from '@nestjs/swagger';
+import { RequestWithUser } from '@/common/types/request-with-user';
+import { CompleteNeedDto } from './dto/complete-need.dto';
+
  
 @ApiTags('Needs')
-@ApiBearerAuth()
+@ApiBearerAuth('access-token')
 @Controller('needs')
 export class NeedsController {
   constructor(private readonly needsService: NeedsService) {}
@@ -26,7 +29,7 @@ export class NeedsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ONG_ADMIN)
-  create(@Body() dto: CreateNeedDto, @Request() req) {
+  create(@Body() dto: CreateNeedDto, @Request() req: RequestWithUser) {
     return this.needsService.create(dto, req.user.sub);
   }
  
@@ -46,8 +49,25 @@ export class NeedsController {
   updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateNeedStatusDto,
-    @Request() req,
+    @Request() req: RequestWithUser,
   ) {
     return this.needsService.updateStatus(id, req.user.sub, dto);
+  }
+
+  @Patch(':id/complete')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ONG_ADMIN)
+  @ApiBody({ type: CompleteNeedDto })
+  complete(
+    @Param('id') id: string,
+    @Body() dto: CompleteNeedDto,
+    @Request() req: RequestWithUser,
+  ) {
+    return this.needsService.completeNeed(
+      id,
+      req.user.sub,
+      dto.message,
+      dto.images,
+    );
   }
 }

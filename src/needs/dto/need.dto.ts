@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateNeedDto {
   @ApiProperty()
   @IsString()
-  title: string;
+  title!: string;
  
   @ApiProperty()
   @IsOptional()
@@ -14,15 +14,15 @@ export class CreateNeedDto {
  
   @ApiProperty()
   @IsString()
-  category: string;
+  category!: string;
  
   @ApiProperty()
   @IsInt()
   @Min(1)
-  quantityNeeded: number;
+  quantityNeeded!: number;
 }
  
 export class UpdateNeedStatusDto {
   @IsEnum(NeedStatus)
-  status: NeedStatus;
+  status!: NeedStatus;
 }

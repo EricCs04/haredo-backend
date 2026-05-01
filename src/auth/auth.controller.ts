@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RefreshTokenDto, LoginDto } from './dto/auth.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-
+import { RequestWithUser } from '@/common/types/request-with-user';
  
 @ApiTags('Auth')
 @Controller('auth')
@@ -13,7 +13,7 @@ export class AuthController {
   @ApiBody({ type: LoginDto })  
   @UseGuards(AuthGuard('local'))
   @Post('login')
-  login(@Request() req) {
+  login(@Request() req: RequestWithUser) {
     return this.authService.login(req.user);
   }
  

@@ -18,8 +18,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/role.enum';
-import { ApiBearerAuth } from '@nestjs/swagger';
- 
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { RequestWithUser } from '@/common/types/request-with-user';
+import { ConfirmDonationDto } from './dto/donation.dto';
+
+
 @ApiBearerAuth('access-token')
 @Controller('donations')
 export class DonationsController {
@@ -28,18 +31,18 @@ export class DonationsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.USER)
-  create(@Body() dto: CreateDonationDto, @Request() req) {
-    console.log('REQ USER:', req.user);
-    return this.donationsService.create(dto, req.user.sub);
+  create(@Body() dto: CreateDonationDto, @Request() req: RequestWithUser) {
+  console.log('REQ USER:', req.user);
+  return this.donationsService.create(dto, req.user.sub);
   }
  
   @Get('my')
   @UseGuards(JwtAuthGuard)
-  getMyDonations(@Request() req) {
-    if (req.user.role === Role.USER) {
-      return this.donationsService.findByUser(req.user.sub);
-    }
-    return this.donationsService.findByOng(req.user.sub);
+  getMyDonations(@Request() req: RequestWithUser) {
+  if (req.user.role === Role.USER) {
+    return this.donationsService.findByUser(req.user.sub);
+  }
+  return this.donationsService.findByOng(req.user.sub);
   }
  
   @Get(':id')
@@ -51,9 +54,9 @@ export class DonationsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ONG_ADMIN)
   updateStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateDonationStatusDto,
-    @Request() req,
+  @Param('id') id: string,
+  @Body() dto: UpdateDonationStatusDto,
+  @Request() req: RequestWithUser,
   ) {
     return this.donationsService.updateStatus(id, req.user.sub, dto);
   }
@@ -63,14 +66,30 @@ export class DonationsController {
   addMessage(
     @Param('id') id: string,
     @Body() dto: CreateMessageDto,
-    @Request() req,
+    @Request() req: RequestWithUser,
   ) {
     return this.donationsService.addMessage(id, req.user.sub, req.user.role, dto);
   }
  
   @Get(':id/messages')
-  @UseGuards(JwtAuthGuard)
-  getMessages(@Param('id') id: string) {
-    return this.donationsService.getMessages(id);
+    @UseGuards(JwtAuthGuard)
+    getMessages(@Param('id') id: string) {
+      return this.donationsService.getMessages(id);
+    }
+
+  @Patch(':id/confirm')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ONG_ADMIN)
+  @ApiBody({ type: ConfirmDonationDto })
+  confirm(
+    @Param('id') id: string,
+    @Body() dto: ConfirmDonationDto,
+    @Request() req: RequestWithUser,
+  ) {
+    return this.donationsService.confirmDonation(
+      id,
+      dto.code,
+      req.user.sub,
+    );
   }
 }

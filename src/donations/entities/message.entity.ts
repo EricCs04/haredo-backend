@@ -13,21 +13,21 @@ export type SenderType = 'user' | 'ong';
 @Entity('messages')
 export class Message {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
  
   @ManyToOne(() => Donation, (donation) => donation.messages, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'donation_id' })
-  donation: Donation;
+  donation!: Donation;
  
   @Column({ name: 'sender_id' })
-  senderId: string;
+  senderId!: string;
  
   @Column({ name: 'sender_type', type: 'varchar' })
-  senderType: SenderType;
+  senderType!: SenderType;
  
   @Column({ type: 'text' })
-  content: string;
+  content!: string;
  
   @CreateDateColumn({ name: 'sent_at' })
-  sentAt: Date;
+  sentAt!: Date;
 }
