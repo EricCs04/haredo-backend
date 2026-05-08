@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -88,7 +89,11 @@ export class NeedsService {
     throw new ForbiddenException();
   }
 
-  need.status = NeedStatus.FULFILLED;
+  if (need.status === NeedStatus.COMPLETED) {
+    throw new BadRequestException('Campanha já finalizada');
+  }
+
+  need.status = NeedStatus.COMPLETED;
   need.completionMessage = message;
   need.images = images;
 

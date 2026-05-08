@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CollectionPoint } from './entities/collection-point.entity';
 import { CreateCollectionPointDto } from './dto/create-collection-point.dto';
+import { Need } from '../needs/entities/need.entity';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class CollectionPointsService {
   constructor(
     @InjectRepository(CollectionPoint)
     private readonly repo: Repository<CollectionPoint>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(dto: CreateCollectionPointDto, ongId: string): Promise<CollectionPoint> {
@@ -37,4 +40,18 @@ export class CollectionPointsService {
       [lng, lat],
     );
   }
+  async findByNeed(needId: string) {
+  const need = await this.dataSource.getRepository(Need).findOne({
+    where: { id: needId },
+    relations: ['ong'],
+  });
+
+  if (!need) {
+    throw new NotFoundException('Need não encontrado');
+  }
+
+  return this.repo.find({
+    where: { ong: { id: need.ong.id } },
+  });
+}
 }

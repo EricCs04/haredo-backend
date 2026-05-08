@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "target": "ES2022",
     "lib": ["ES2022"],
 
     "outDir": "./dist",
     "rootDir": "./src",
 
-    "incremental": true,
+    "incremental": false,
     "sourceMap": true,
     "declaration": true,
     "removeComments": true,
@@ -16,7 +16,6 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-   
 
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -24,14 +23,22 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+  
 
-    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
 
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    
+      "@/*": ["src/*"]
+    }
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+
+  "include": ["src/**/*.ts"],
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "backup-specs",
+    "test",
+    "**/*.spec.ts"
+  ]
 }

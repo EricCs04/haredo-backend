@@ -6,6 +6,7 @@ import {
   Query,
   UseGuards,
   Request,
+  Param,
 } from '@nestjs/common';
 import { CollectionPointsService } from './collection-points.service';
 import { CreateCollectionPointDto } from './dto/create-collection-point.dto';
@@ -19,17 +20,24 @@ import { ApiBearerAuth } from '@nestjs/swagger/dist/decorators/api-bearer.decora
 @ApiBearerAuth('access-token')
 @Controller('collection-points')
 export class CollectionPointsController {
-  constructor(private readonly service: CollectionPointsService) {}
+  constructor(private readonly service: CollectionPointsService,
+
+  ) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ONG_ADMIN)
-  create(@Body() dto: CreateCollectionPointDto, @Request() req: RequestWithUser) {
-    return this.service.create(dto, req.user.sub);
-  }
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ONG_ADMIN)
+create(@Body() dto: CreateCollectionPointDto, @Request() req: RequestWithUser) {
+  return this.service.create(dto, req.user.sub);
+}
 
-  @Get('nearby')
-  findNearby(@Query('lat') lat: string, @Query('lng') lng: string) {
-    return this.service.findNearby(Number(lat), Number(lng));
-  }
+@Get('nearby')
+findNearby(@Query('lat') lat: string, @Query('lng') lng: string) {
+  return this.service.findNearby(Number(lat), Number(lng));
+}
+
+@Get('need/:needId')
+findByNeed(@Param('needId') needId: string) {
+  return this.service.findByNeed(needId);
+}
 }

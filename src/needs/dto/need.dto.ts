@@ -1,6 +1,7 @@
-import { IsString, IsInt, IsOptional, IsEnum, Min } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsEnum, Min, IsDateString } from 'class-validator';
 import { NeedStatus } from '../need-status.enum';
 import { ApiProperty } from '@nestjs/swagger';
+import { NeedPriority } from '../need-priority.enum';
  
 export class CreateNeedDto {
   @ApiProperty()
@@ -20,6 +21,14 @@ export class CreateNeedDto {
   @IsInt()
   @Min(1)
   quantityNeeded!: number;
+
+  @ApiProperty()
+  @IsEnum(NeedPriority)
+  priority!: NeedPriority;
+
+  @ApiProperty()
+  @IsDateString()
+  deadline!: string;
 }
  
 export class UpdateNeedStatusDto {

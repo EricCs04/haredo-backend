@@ -77,7 +77,7 @@ export class DonationsService {
   async findOne(id: string): Promise<Donation> {
     const donation = await this.donationsRepo.findOne({
       where: { id },
-      relations: ['need', 'ong', 'user', 'messages'],
+      relations: ['need', 'ong', 'user', 'messages', 'need.ong'],
     });
     if (!donation) throw new NotFoundException('Doação não encontrada.');
     return donation;
