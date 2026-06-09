@@ -51,4 +51,22 @@ export class Donation {
 
   @Column({ default: false })
   confirmed!: boolean;
+
+  @Column({ nullable: true })
+  validatorId?: string;
+
+  @Column({ nullable: true })
+  validatorName?: string;
+
+  @Column({ nullable: true })
+  validatorEmail?: string;
+
+  @Column({ nullable: true })
+  validatorPhone?: string;
+
+  @Column({
+    type:'timestamp',
+    nullable:true
+  })
+  validatedAt?: Date;
 }

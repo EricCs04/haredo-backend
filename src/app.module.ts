@@ -14,6 +14,7 @@ import { Message } from './donations/entities/message.entity';
 import { CollectionPointsModule } from './collection-points/collection-points.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CollectionPoint } from './collection-points/entities/collection-point.entity';
+import { DashboardModule } from './dashboard/dashboard.module';
  
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CollectionPoint } from './collection-points/entities/collection-point.e
     DonationsModule,
     CollectionPointsModule,
     NotificationsModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}

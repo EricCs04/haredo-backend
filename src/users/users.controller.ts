@@ -18,4 +18,7 @@ export class UsersController {
   getProfile(@Request() req: RequestWithUser) {
     return this.usersService.findById(req.user.sub);
   }
+
+  
 }
+

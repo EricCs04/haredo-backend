@@ -1,9 +1,12 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Ong } from './entities/ong.entity';
 import { CreateOngDto } from './dto/create-ong.dto';
+import { Role } from '@/auth/role.enum';
+import { CreateValidatorDto } from './dto/create-validator.dto';
+
  
 @Injectable()
 export class OngsService {
@@ -55,7 +58,10 @@ export class OngsService {
 }
  
   async findByEmail(email: string): Promise<Ong | null> {
-    return this.ongsRepo.findOne({ where: { email } });
+    return this.ongsRepo.findOne({
+      where: { email },
+      relations: ['parentOng'],
+    });
   }
  
   async findById(id: string): Promise<Ong | null> {
@@ -89,4 +95,52 @@ export class OngsService {
       ])
       .getMany();
   }
+  async createValidator(
+ dto:CreateValidatorDto, ongId:string
+){
+  const ong = await this.ongsRepo.findOne({
+    where: { id: ongId },
+  });
+
+  if (!ong) throw new BadRequestException('ONG não encontrada');
+
+ const exists =
+ await this.ongsRepo.findOne({
+   where:{
+     email:dto.email
+   }
+
+ });
+
+ if(exists){
+
+   throw new BadRequestException(
+     'Email já existe'
+   );
+
+ }
+
+ const hash=
+ await bcrypt.hash(
+   dto.password,
+   10
+ );
+
+ const validator=
+ this.ongsRepo.create({
+
+   name:dto.name,
+   email:dto.email,
+   passwordHash:hash,
+   phone:dto.phone,
+   role: Role.ONG_VALIDATOR,
+   parentOng:ong
+ });
+
+ return await this.ongsRepo
+ .save(
+   validator
+ );
+
+}
 }

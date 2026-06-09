@@ -29,6 +29,11 @@ export class CreateNeedDto {
   @ApiProperty()
   @IsDateString()
   deadline!: string;
+
+  @ApiProperty()
+  @IsInt()
+  @Min(1)
+  totalItemsReceived!: number;
 }
  
 export class UpdateNeedStatusDto {

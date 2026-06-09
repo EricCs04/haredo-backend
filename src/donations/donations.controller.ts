@@ -39,10 +39,16 @@ export class DonationsController {
   @Get('my')
   @UseGuards(JwtAuthGuard)
   getMyDonations(@Request() req: RequestWithUser) {
-  if (req.user.role === Role.USER) {
-    return this.donationsService.findByUser(req.user.sub);
-  }
-  return this.donationsService.findByOng(req.user.sub);
+
+    console.log(req.user);
+
+    if (req.user.role === Role.USER) {
+      return this.donationsService.findByUser(req.user.sub);
+    }
+
+    return this.donationsService.findByOng(
+      req.user.ongId ?? req.user.sub,
+    );
   }
  
   @Get(':id')
@@ -79,7 +85,10 @@ export class DonationsController {
 
   @Patch(':id/confirm')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ONG_ADMIN)
+  @Roles(
+    Role.ONG_ADMIN,
+    Role.ONG_VALIDATOR
+  )
   @ApiBody({ type: ConfirmDonationDto })
   confirm(
     @Param('id') id: string,
@@ -89,7 +98,8 @@ export class DonationsController {
     return this.donationsService.confirmDonation(
       id,
       dto.code,
+      req.user.ongId ?? req.user.sub,
       req.user.sub,
-    );
+);
   }
 }

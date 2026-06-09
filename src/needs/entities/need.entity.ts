@@ -67,4 +67,7 @@ export class Need {
 
   @Column('text', { array: true, nullable: true })
   images?: string[];
+
+  @Column({ nullable: true })
+  totalItemsReceived!: number;
 }

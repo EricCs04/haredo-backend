@@ -18,6 +18,7 @@ import {
   CreateMessageDto,
 } from './dto/donation.dto';
 import { randomBytes } from 'crypto';
+import { Ong } from '@/ongs/entities/ong.entity';
  
 @Injectable()
 export class DonationsService {
@@ -34,7 +35,7 @@ export class DonationsService {
   async create(dto: CreateDonationDto, userId: string): Promise<Donation> {
     const need = await this.needsService.findOne(dto.needId);
  
-    if (need.status === NeedStatus.FULFILLED || need.status === NeedStatus.CANCELLED) {
+    if (need.status === NeedStatus.COMPLETED || need.status === NeedStatus.CANCELLED) {
       throw new BadRequestException(
         `Não é possível doar para uma necessidade com status "${need.status}".`,
       );
@@ -154,6 +155,7 @@ export class DonationsService {
     donationId: string,
     code: string,
     ongId: string,
+    validatorId: string,
   ): Promise<Donation> {
     return this.dataSource.transaction(async (manager) => {
       const donation = await manager.findOne(Donation, {
@@ -177,14 +179,45 @@ export class DonationsService {
        throw new BadRequestException('Doação já confirmada');
       }
 
+      const validator = await manager.findOne(Ong, {
+        where: {
+          id: validatorId,
+        },
+      });
+
+      if (!validator) {
+        throw new NotFoundException(
+          'Validador não encontrado'
+        );
+      }
+
       donation.confirmed = true;
-      donation.status = DonationStatus.COMPLETED;
+
+      donation.status =
+      DonationStatus.COMPLETED;
+
+      donation.validatorId =
+      validator.id;
+
+      donation.validatorName =
+      validator.name;
+
+      donation.validatorEmail =
+      validator.email;
+
+      donation.validatorPhone =
+      validator.phone;
+
+      donation.validatedAt =
+      new Date();
 
       await manager.save(donation);
 
       const need = donation.need;
 
-      need.quantityReceived += donation.quantity;
+      //need.quantityReceived += donation.quantity;
+      need.quantityReceived += 1; // Contabiliza numero de doações, não a quantidade total doada, para evitar inconsistências
+      need.totalItemsReceived += donation.quantity; // Atualiza o total de itens recebidos para exibição no app
 
       if (need.quantityReceived >= need.quantityNeeded) {
         need.status = NeedStatus.FULFILLED;
@@ -197,4 +230,4 @@ export class DonationsService {
       return donation;
     });
   }
-}
+  }

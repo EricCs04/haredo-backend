@@ -32,7 +32,7 @@
     }
   },
 
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "backup-specs-old/dashboard.controller.spec.ts", "backup-specs-old/dashboard.service.spec.ts"],
 
   "exclude": [
     "node_modules",

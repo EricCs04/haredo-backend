@@ -11,6 +11,11 @@ import { OngsService } from './ongs.service';
 import { CreateOngDto } from './dto/create-ong.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RequestWithUser } from '@/common/types/request-with-user';
+import { CreateValidatorDto } from './dto/create-validator.dto';
+import { Roles } from '@/auth/roles.decorator';
+import { RolesGuard } from '@/auth/guards/roles.guard';
+import { Role } from '@/auth/role.enum';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
  
 @Controller('ongs')
@@ -45,4 +50,15 @@ export class OngsController {
   getProfile(@Request() req: RequestWithUser) {
     return this.ongsService.findById(req.user.sub);
   }
+
+  @Post('/create-validator')
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ONG_ADMIN)
+  createValidator(
+  @Body() dto: CreateValidatorDto,
+  @Request() req: RequestWithUser,
+) {
+  return this.ongsService.createValidator(dto, req.user.sub);
+}
 }

@@ -5,7 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  ManyToOne,
 } from 'typeorm';
+import { Ong } from '../../ongs/entities/ong.entity';
+
+
  
 @Entity('users')
 export class User {
@@ -42,4 +46,9 @@ export class User {
  
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
+  
+  @ManyToOne(() => Ong, (ong) => ong.id, { nullable: true })
+  ong!: Ong | null;
+
+  
 }
